@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>College Admission Agent</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      padding: 40px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    .chat-box {
+      border: 1px solid #ccc;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      min-height: 300px;
+      margin-bottom: 20px;
+      overflow-y: auto;
+      max-height: 400px;
+    }
+    .user, .bot {
+      margin-bottom: 10px;
+    }
+    .user {
+      text-align: right;
+      color: blue;
+    }
+    .bot {
+      text-align: left;
+      color: green;
+    }
+    input[type="text"] {
+      padding: 8px;
+      font-size: 14px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 14px;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>College Admission Agent</h1>
+  <div class="chat-box" id="chat-box"></div>
+
+  <input type="text" id="user-input" placeholder="Ask something about admission..." />
+  <button onclick="sendQuery()">Send</button>
+
+  <script>
+    async function sendQuery() {
+      const userInput = document.getElementById("user-input").value.trim();
+      if (!userInput) return;
+
+      const chatBox = document.getElementById("chat-box");
+      chatBox.innerHTML += `<div class="user"><strong>You:</strong> ${userInput}</div>`;
+      document.getElementById("user-input").value = "";
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ query: userInput })
+        });
+
+        if (!response.ok) {
+          throw new Error("Server error: " + response.status);
+        }
+
+        const data = await response.json();
+        chatBox.innerHTML += `<div class="bot"><strong>Bot:</strong> ${data.answer}</div>`;
+      } catch (error) {
+        chatBox.innerHTML += `<div class="bot"><strong>Bot:</strong> Error connecting to server.</div>`;
+        console.error("Fetch error:", error);
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Optional: Send query on pressing Enter
+    document.getElementById("user-input").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") sendQuery();
+    });
+  </script>
+</body>
+</html>
